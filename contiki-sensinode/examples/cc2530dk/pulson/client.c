@@ -117,8 +117,26 @@ PROCESS_THREAD(udp_client_process, ev, data)
   PROCESS_BEGIN();
   PRINTF("UDP client process started\n");
 
-  uip_ip6addr(&ipaddr, 0xfe80, 0, 0, 0, 0x0215, 0x2000, 0x0002, 0x2145);
+  leds_on(LEDS_GREEN);
+  leds_off(LEDS_RED);
+
+  etimer_set(&et, SEND_INTERVAL/2);
+
+  while(1) {
+    PROCESS_YIELD();
+    if(etimer_expired(&et)) {
+      //timeout_handler();
+      leds_toggle(LEDS_RED);
+      leds_toggle(LEDS_GREEN);
+      putstring("Oh my god!");
+      etimer_restart(&et);
+    } //else if(ev == tcpip_event) {
+      //tcpip_handler();
+    //}
+  }
+//  uip_ip6addr(&ipaddr, 0xfe80, 0, 0, 0, 0x0215, 0x2000, 0x0002, 0x2145);
   /* new connection with remote host */
+  /*
   l_conn = udp_new(&ipaddr, UIP_HTONS(3000), NULL);
   if(!l_conn) {
     PRINTF("udp_new l_conn error.\n");
@@ -153,7 +171,7 @@ PROCESS_THREAD(udp_client_process, ev, data)
       tcpip_handler();
     }
   }
-
+*/
   PROCESS_END();
 }
 /*---------------------------------------------------------------------------*/
