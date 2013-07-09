@@ -64,9 +64,12 @@ AUTOSTART_PROCESSES(&udp_server_process);
 /*---------------------------------------------------------------------------*/
 static void
 tcpip_handler(void)
-{
+{ int r;
   memset(buf, 0, MAX_PAYLOAD_LEN);
   if(uip_newdata()) {
+	putstring("Oh my god a new packet received!");
+	r = packetbuf_attr(PACKETBUF_ATTR_RSSI);
+	putstring("the RSSI value is %u", r);
     leds_on(LEDS_RED);
     len = uip_datalen();
     memcpy(buf, uip_appdata, len);
