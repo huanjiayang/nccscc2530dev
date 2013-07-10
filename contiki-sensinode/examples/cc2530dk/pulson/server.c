@@ -66,10 +66,11 @@ static void
 tcpip_handler(void)
 { int r;
   memset(buf, 0, MAX_PAYLOAD_LEN);
+  PRINTF("Into tcpip_handler");
   if(uip_newdata()) {
-	putstring("Oh my god a new packet received!");
+	PRINTF("Oh my god a new packet received!");
 	r = packetbuf_attr(PACKETBUF_ATTR_RSSI);
-	putstring("the RSSI value is %u", r);
+	PRINTF("the RSSI value is %i OK!  ", r);
     leds_on(LEDS_RED);
     len = uip_datalen();
     memcpy(buf, uip_appdata, len);
@@ -169,6 +170,7 @@ PROCESS_THREAD(udp_server_process, ev, data)
   while(1) {
     PROCESS_YIELD();
     if(ev == tcpip_event) {
+      putstring("ev==tcpip_event\n");
       tcpip_handler();
 #if (BUTTON_SENSOR_ON && (DEBUG==DEBUG_PRINT))
     } else if(ev == sensors_event && data == &button_sensor) {

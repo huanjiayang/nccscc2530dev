@@ -83,7 +83,7 @@ timeout_handler(void)
   static int seq_id;
   struct uip_udp_conn *this_conn;
 
-  leds_on(LEDS_RED);
+  leds_on(LEDS_GREEN);
   memset(buf, 0, MAX_PAYLOAD_LEN);
   seq_id++;
 
@@ -106,7 +106,7 @@ timeout_handler(void)
   PRINTF(" (msg=0x%04x), %u bytes\n", *(uint16_t *) buf, sizeof(seq_id));
 
   uip_udp_packet_send(this_conn, buf, sizeof(seq_id));
-  leds_off(LEDS_RED);
+  leds_off(LEDS_GREEN);
 }
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(udp_client_process, ev, data)
@@ -135,12 +135,13 @@ PROCESS_THREAD(udp_client_process, ev, data)
     //}
   }
   */
-  uip_ip6addr(&ipaddr, 0xfe80, 0, 0, 0, 0x0215, 0x2000, 0x0002, 0x2145);
+  uip_ip6addr(&ipaddr, 0xfe80, 0, 0, 0, 0x0212, 0x4b00, 0x0205, 0xf358);
   /* new connection with remote host */
 
   l_conn = udp_new(&ipaddr, UIP_HTONS(3000), NULL);
   if(!l_conn) {
     PRINTF("udp_new l_conn error.\n");
+    leds_on(LEDS_RED);
   }
   udp_bind(l_conn, UIP_HTONS(LOCAL_CONN_PORT));
 
@@ -153,6 +154,7 @@ PROCESS_THREAD(udp_client_process, ev, data)
   g_conn = udp_new(&ipaddr, UIP_HTONS(3000), NULL);
   if(!g_conn) {
     PRINTF("udp_new g_conn error.\n");
+    leds_on(LEDS_RED);
   }
   udp_bind(g_conn, UIP_HTONS(GLOBAL_CONN_PORT));
 
