@@ -66,17 +66,17 @@ static void
 tcpip_handler(void)
 { int r;
   memset(buf, 0, MAX_PAYLOAD_LEN);
-  PRINTF("Into tcpip_handler");
+  //PRINTF("Into tcpip_handler");
   if(uip_newdata()) {
-	PRINTF("Oh my god a new packet received!");
+	//PRINTF("Oh my god a new packet received!");
 	r = packetbuf_attr(PACKETBUF_ATTR_RSSI);
-	PRINTF("the RSSI value is %i OK!  ", r);
+	//PRINTF("the RSSI value is %i OK!  ", r);
     leds_on(LEDS_RED);
     len = uip_datalen();
     memcpy(buf, uip_appdata, len);
-    PRINTF("%u bytes from [", len);
+    PRINTF("<sp_msg>%u bytes from <ip>", len);
     PRINT6ADDR(&UIP_IP_BUF->srcipaddr);
-    PRINTF("]:%u\n", UIP_HTONS(UIP_UDP_BUF->srcport));
+    PRINTF("</ip>:%u RSSI:<rssi>%i</rssi></sp_msg>\n", UIP_HTONS(UIP_UDP_BUF->srcport),r);
 #if SERVER_REPLY
     uip_ipaddr_copy(&server_conn->ripaddr, &UIP_IP_BUF->srcipaddr);
     server_conn->rport = UIP_UDP_BUF->srcport;
@@ -170,7 +170,7 @@ PROCESS_THREAD(udp_server_process, ev, data)
   while(1) {
     PROCESS_YIELD();
     if(ev == tcpip_event) {
-      putstring("ev==tcpip_event\n");
+     // putstring("ev==tcpip_event\n");
       tcpip_handler();
 #if (BUTTON_SENSOR_ON && (DEBUG==DEBUG_PRINT))
     } else if(ev == sensors_event && data == &button_sensor) {
