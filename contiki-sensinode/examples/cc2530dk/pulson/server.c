@@ -76,7 +76,7 @@ tcpip_handler(void)
     memcpy(buf, uip_appdata, len);
     PRINTF("<sp_msg>%u bytes from <ip>", len);
     PRINT6ADDR(&UIP_IP_BUF->srcipaddr);
-    PRINTF("</ip>:%u RSSI:<rssi>%i</rssi></sp_msg>\n", UIP_HTONS(UIP_UDP_BUF->srcport),r);
+    PRINTF("</ip>:%u RSSI:<rssi>%i</rssi>\n</sp_msg>", UIP_HTONS(UIP_UDP_BUF->srcport),r);
 #if SERVER_REPLY
     uip_ipaddr_copy(&server_conn->ripaddr, &UIP_IP_BUF->srcipaddr);
     server_conn->rport = UIP_UDP_BUF->srcport;
@@ -165,7 +165,7 @@ PROCESS_THREAD(udp_server_process, ev, data)
   server_conn = udp_new(NULL, UIP_HTONS(0), NULL);
   udp_bind(server_conn, UIP_HTONS(3000));
 
-  PRINTF("Listen port: 3000, TTL=%u\n", server_conn->ttl);
+  PRINTF("Listen port: 3000, TTL=%u\n</head_msg>", server_conn->ttl);
 
   while(1) {
     PROCESS_YIELD();
