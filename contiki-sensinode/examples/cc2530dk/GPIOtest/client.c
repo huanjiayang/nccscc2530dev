@@ -44,6 +44,9 @@
 
 static char buf[MAX_PAYLOAD_LEN];
 
+/* The public variable to hold the GPIO state*/
+static int GPIO_state;
+
 /* Our destinations and udp conns. One link-local and one global */
 #define LOCAL_CONN_PORT 3001
 static struct uip_udp_conn *l_conn;
@@ -77,8 +80,16 @@ tcpip_handler(void)
   return;
 }
 
-static void readSensor(void){
-	return;
+static int GPIO_readState(GPIO_pin){
+	int state;
+
+	// play with CC2530 P0.2
+	P0SEL &= ~GPIO_pin; /* Set as GPIO */
+	P0DIR &= ~GPIO_pin; /* Set as Input */
+	P0INP |= GPIO_pin; /* Set as tri-state */
+	state = PORT_READ(0,2);
+
+	return state;
 
 }
 /*---------------------------------------------------------------------------*/
@@ -91,6 +102,10 @@ timeout_handler(void)
   leds_on(LEDS_GREEN);
   memset(buf, 0, MAX_PAYLOAD_LEN);
   seq_id++;
+
+  int GPIO_pin = 0x04;
+  GPIO_state = GPIO_readState(GPIO_pin);
+
 
   /* evens / odds */
   if(seq_id & 0x01) {
@@ -105,12 +120,12 @@ timeout_handler(void)
   PRINTF("Client to: ");
   PRINT6ADDR(&this_conn->ripaddr);
 
-  memcpy(buf, &seq_id, sizeof(seq_id));
+  memcpy(buf, &GPIO_state, sizeof(GPIO_state));
 
   PRINTF(" Remote Port %u,", UIP_HTONS(this_conn->rport));
-  PRINTF(" (msg=0x%04x), %u bytes\n", *(uint16_t *) buf, sizeof(seq_id));
+  PRINTF(" (msg=0x%04x), %u bytes\n", *(uint16_t *) buf, sizeof(GPIO_state));
 
-  uip_udp_packet_send(this_conn, buf, sizeof(seq_id));
+  uip_udp_packet_send(this_conn, buf, sizeof(GPIO_state));
   leds_off(LEDS_GREEN);
 }
 /*---------------------------------------------------------------------------*/

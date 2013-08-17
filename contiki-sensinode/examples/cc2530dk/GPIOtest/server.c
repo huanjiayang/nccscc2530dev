@@ -76,7 +76,7 @@ tcpip_handler(void)
     memcpy(buf, uip_appdata, len);
     PRINTF("<sp_msg>%u bytes from <ip>", len);
     PRINT6ADDR(&UIP_IP_BUF->srcipaddr);
-    PRINTF("</ip>:%u RSSI:<rssi>%i</rssi>\n</sp_msg>", UIP_HTONS(UIP_UDP_BUF->srcport),r);
+    PRINTF("</ip>:%u RSSI:<GPIOstate>%i</GPIOstate>\n</sp_msg>", UIP_HTONS(UIP_UDP_BUF->srcport),buf[0]);
 #if SERVER_REPLY
     uip_ipaddr_copy(&server_conn->ripaddr, &UIP_IP_BUF->srcipaddr);
     server_conn->rport = UIP_UDP_BUF->srcport;
@@ -161,11 +161,6 @@ PROCESS_THREAD(udp_server_process, ev, data)
 #if SERVER_RPL_ROOT
   create_dag();
 #endif
-
-  // play with CC2530 P0.2
-  P0SEL &= ~0x04; /* Set as GPIO */
-  P0DIR &= ~0x04; /* Set as Input */
-  P0INP |= 0x04; /* Set as tri-state */
 
   server_conn = udp_new(NULL, UIP_HTONS(0), NULL);
   udp_bind(server_conn, UIP_HTONS(3000));
