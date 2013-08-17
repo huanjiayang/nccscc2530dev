@@ -35,6 +35,7 @@
 #include "dev/leds.h"
 #include "dev/button-sensor.h"
 #include "debug.h"
+#include "port.h"
 
 #define DEBUG DEBUG_PRINT
 #include "net/uip-debug.h"
@@ -80,16 +81,15 @@ tcpip_handler(void)
   return;
 }
 
-static int GPIO_readState(GPIO_pin){
-	int state;
+static void GPIO_readState(void){
 
 	// play with CC2530 P0.2
-	P0SEL &= ~GPIO_pin; /* Set as GPIO */
-	P0DIR &= ~GPIO_pin; /* Set as Input */
-	P0INP |= GPIO_pin; /* Set as tri-state */
-	state = PORT_READ(0,2);
+	P0SEL &= ~0x04; /* Set as GPIO */
+	P0DIR &= ~0x04; /* Set as Input */
+	P0INP |= 0x04; /* Set as tri-state */
+	GPIO_state = PORT_READ(0,2);
 
-	return state;
+	return;
 
 }
 /*---------------------------------------------------------------------------*/
@@ -103,8 +103,8 @@ timeout_handler(void)
   memset(buf, 0, MAX_PAYLOAD_LEN);
   seq_id++;
 
-  int GPIO_pin = 0x04;
-  GPIO_state = GPIO_readState(GPIO_pin);
+  //int GPIO_pin = 0x04;
+  GPIO_readState();
 
 
   /* evens / odds */
