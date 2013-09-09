@@ -47,6 +47,7 @@ static char buf[MAX_PAYLOAD_LEN];
 
 /* The public variable to hold the GPIO state*/
 static int GPIO_state;
+static float GPIO_reading;
 
 /* Our destinations and udp conns. One link-local and one global */
 #define LOCAL_CONN_PORT 3001
@@ -83,11 +84,13 @@ tcpip_handler(void)
 
 static void GPIO_readState(void){
 
-	// play with CC2530 P0.2
-	P0SEL &= ~0x04; /* Set as GPIO */
-	P0DIR &= ~0x04; /* Set as Input */
-	P0INP |= 0x04; /* Set as tri-state */
-	GPIO_state = PORT_READ(0,2);
+	// play with CC2530 P0.4
+	P0SEL &= ~0x10; /* Set as GPIO */
+	P0DIR &= ~0x10; /* Set as Input */
+	P0INP |= 0x10; /* Set as tri-state */
+	//APCFG |= 1 << 4;
+	GPIO_reading = PORT_READ(0,4);
+	PRINTF("pin 4 reading is %4.4f\n",GPIO_reading);
 
 	return;
 
