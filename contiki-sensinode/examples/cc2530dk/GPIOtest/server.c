@@ -65,6 +65,7 @@ AUTOSTART_PROCESSES(&udp_server_process);
 static void
 tcpip_handler(void)
 { int r;
+  int i;
   memset(buf, 0, MAX_PAYLOAD_LEN);
   //PRINTF("Into tcpip_handler");
   if(uip_newdata()) {
@@ -77,6 +78,13 @@ tcpip_handler(void)
     PRINTF("<sp_msg>%u bytes from <ip>", len);
     PRINT6ADDR(&UIP_IP_BUF->srcipaddr);
     PRINTF("</ip>:%u RSSI:<GPIOstate>%i</GPIOstate>\n</sp_msg>", UIP_HTONS(UIP_UDP_BUF->srcport),buf[0]);
+
+    PRINTF("<test>");
+    for(i = 0; i<len; i++) {
+    	PRINTF("0x%04x",buf[i]);
+    }
+    PRINTF("</test>");
+
 #if SERVER_REPLY
     uip_ipaddr_copy(&server_conn->ripaddr, &UIP_IP_BUF->srcipaddr);
     server_conn->rport = UIP_UDP_BUF->srcport;

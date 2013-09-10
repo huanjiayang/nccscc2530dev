@@ -37,6 +37,13 @@
 #include "debug.h"
 #include "port.h"
 
+#include "adc-sensor.h"
+#include "cc253x.h"
+#include "contiki-conf.h"
+#include "lib/sensors.h"
+#include "sfr-bits.h"
+#include "cc253x.h"
+
 #define DEBUG DEBUG_PRINT
 #include "net/uip-debug.h"
 
@@ -46,8 +53,8 @@
 static char buf[MAX_PAYLOAD_LEN];
 
 /* The public variable to hold the GPIO state*/
-static int GPIO_state;
-static float GPIO_reading;
+static uint16_t GPIO_state;
+static uint16_t reading;
 
 /* Our destinations and udp conns. One link-local and one global */
 #define LOCAL_CONN_PORT 3001
@@ -83,14 +90,36 @@ tcpip_handler(void)
 }
 
 static void GPIO_readState(void){
+	//float GPIO_reading;
 
 	// play with CC2530 P0.4
 	P0SEL &= ~0x10; /* Set as GPIO */
 	P0DIR &= ~0x10; /* Set as Input */
 	P0INP |= 0x10; /* Set as tri-state */
-	//APCFG |= 1 << 4;
-	GPIO_reading = PORT_READ(0,4);
-	PRINTF("pin 4 reading is %4.4f\n",GPIO_reading);
+	APCFG |= 0x10;
+//	ADCCFG |= 0x10;
+
+    ATEST = 0;
+    TESTREG0 = 0;
+
+	  /* Writing in bits 3:0 of ADCCON3 will trigger a single conversion */
+	  //ADCCON3 = (0x00 | ADCCON3_EDIV1 | ADCCON3_EDIV0 | ADCCON3_ECH3 | ADCCON3_ECH2 | ADCCON3_ECH1 | ADCCON3_ECH0);
+    ADCCON3 = 0x34;
+	  /*
+	   * When the conversion is complete, the ADC interrupt flag is set. We don't
+	   * use an ISR here, we just wait on the flag and clear it afterwards.
+	   */
+	  while(!ADCIF);
+	  /* Clear the Interrupt Flag */
+	  ADCIF = 0;
+	  reading = ADCL;
+	  reading |= (((unsigned short) ADCH) << 8);
+	  /* 12-bit decimation rate: 4 LS bits are noise */
+	  reading >>= 4;
+
+
+	GPIO_state = reading;
+	PRINTF("pin 4 reading is %8.8f\n",reading);
 
 	return;
 
@@ -173,7 +202,7 @@ PROCESS_THREAD(udp_client_process, ev, data)
   PRINTF(" local/remote port %u/%u\n",
          UIP_HTONS(l_conn->lport), UIP_HTONS(l_conn->rport));
 
-  uip_ip6addr(&ipaddr, 0xaaaa, 0, 0, 0, 0x0215, 0x2000, 0x0002, 0x2145);
+  uip_ip6addr(&ipaddr, 0xaaaa, 0, 0, 0, 0x0212, 0x4b00, 0x0205, 0xff89);
   g_conn = udp_new(&ipaddr, UIP_HTONS(3000), NULL);
   if(!g_conn) {
     PRINTF("udp_new g_conn error.\n");
