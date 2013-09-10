@@ -99,8 +99,8 @@ static void GPIO_readState(void){
 	APCFG |= 0x10;
 //	ADCCFG |= 0x10;
 
-    ATEST = 0;
-    TESTREG0 = 0;
+//    ATEST = 0;
+//    TESTREG0 = 0;
 
 	  /* Writing in bits 3:0 of ADCCON3 will trigger a single conversion */
 	  //ADCCON3 = (0x00 | ADCCON3_EDIV1 | ADCCON3_EDIV0 | ADCCON3_ECH3 | ADCCON3_ECH2 | ADCCON3_ECH1 | ADCCON3_ECH0);
