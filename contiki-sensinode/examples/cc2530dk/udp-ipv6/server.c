@@ -46,6 +46,8 @@
 
 #define MAX_PAYLOAD_LEN 120
 
+#define LED_INTERVAL		CLOCK_SECOND
+
 static struct uip_udp_conn *server_conn;
 static char buf[MAX_PAYLOAD_LEN];
 static uint16_t len;
@@ -143,9 +145,17 @@ create_dag()
   }
 }
 #endif /* SERVER_RPL_ROOT */
+
+/*---------------------------------------------------------------------------*/
+static void
+timeout_handler(void)
+{
+  leds_toggle(LEDS_RED);
+}
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(udp_server_process, ev, data)
 {
+	static struct etimer et;
 
   PROCESS_BEGIN();
   putstring("Starting UDP server\n");
@@ -163,9 +173,14 @@ PROCESS_THREAD(udp_server_process, ev, data)
 
   PRINTF("Listen port: 3000, TTL=%u\n", server_conn->ttl);
 
+  etimer_set(&et, LED_INTERVAL);
+
   while(1) {
     PROCESS_YIELD();
-    if(ev == tcpip_event) {
+    if(etimer_expired(&et)) {
+        timeout_handler();
+        etimer_restart(&et);
+      } else if(ev == tcpip_event) {
       tcpip_handler();
 #if (BUTTON_SENSOR_ON && (DEBUG==DEBUG_PRINT))
     } else if(ev == sensors_event && data == &button_sensor) {
